@@ -11,9 +11,9 @@ So now you can Bayes - need to do it safely (especially in a regulatory environm
 
 - Motivated by courses I gave in Health Canada in 2010/11 - "resulted" in less than critical review of submissions.  
 - Today is largely to provide motivation to read and work through material/programs developed by Michael Betancourt on Principled Bayesian Workflow.
-- [GitHub for Rstan](https://github.com/betanalpha/knitr_case_studies/tree/master/principled_bayesian_workflow)
-- [GitHub for Pystan](https://github.com/betanalpha/jupyter_case_studies/tree/master/principled_bayesian_workflow)
-- I'll do a largely conceptual introduction and work through a "toyed down" example. [Files on Github.](https://github.com/KeithORourke/BayesinWorkflowLecture)
+- [GitHub for Rstan LINK](https://github.com/betanalpha/knitr_case_studies/tree/master/principled_bayesian_workflow)
+- [GitHub for Pystan LINK](https://github.com/betanalpha/jupyter_case_studies/tree/master/principled_bayesian_workflow)
+- I'll do a largely conceptual introduction and work through a "toyed down" example. [Files on Github LINK.](https://github.com/KeithORourke/BayesinWorkflowLecture)
 
 My relevant background. 
 ========================================================
@@ -30,7 +30,18 @@ My relevant background (cont.)
 - Joined Health Canada 2009, gave Bayesian Courses in 2010/11.
 - Currently at Pest Management Regulatory Agency.
 - Gave webinars on Bayes for the American Statistical Society and CSEB in 2012 (first reviewed positively, not the second).
-- Currently an author on [Statistical Modeling, Causal Inference, and Social Science](https://statmodeling.stat.columbia.edu/author/keithor/) a mostly Bayesian perspective blog. 
+- Currently an author on [Statistical Modeling, Causal Inference, and Social Science LINK](https://statmodeling.stat.columbia.edu/author/keithor/) a mostly Bayesian perspective blog. 
+
+Some of my early experience in Bayesian work.
+========================================================
+
+- Used someone's published Bayesian model - obtained positive posterior probabilities for negative proportions.
+- The priors they had specified were independent even though proportions were dependent.
+- Contacted the author - they were unconcerned.
+- Claimed it was a result of my not having adequate data and so no need to worry. 
+- Sometimes it is hard to know when you have adequate data but the prior is obviously wrong and *should* be fixed.
+- (This sort of thing was be done a lot in early 2000s given limitations).
+
 
 Conceptual review of Bayes. 
 ========================================================
@@ -38,8 +49,8 @@ Seeing all of Bayes all at once.
 
 - Need to go back and focus on basics - not always popular. 
 - Once told that they hide the best techniques in martial arts in the beginners form. 
-- Two stage simulation is not a cheap trick but rather a way to *really, really* understand (first came up with it in 2004). 
-- Told I must be wrong.
+- Two stage simulation (described later) is not a cheap trick but rather a way to *really, really* understand (I first came up with it in 2004). Told I must be wrong.
+- Later learned Don Rubin (Harvard) came up with it 1984. 
 
 Conceptual review of Bayes (cont.) 
 ========================================================
@@ -47,28 +58,36 @@ Seeing all of Bayes all at once.
 
 - Andrew Gelman blogged numerous times - in Bayes you write down the model and simply watch it work (crickets...).
 - From a two stage sampling perspective it is obvious. 
-- But so much more.
+- But so much more!
 - Or as Michael Betancourt put it: Work it, Make it, Do it, Makes Us Harder, Better, Faster, Stronger.
-- Numerous (wild?) claims about Bayes (ASA webinar).  
+
+Conceptual review of Bayes (cont.) 
+========================================================
+
+- Numerous (wild?) claims about Bayes.  
+- For instance in an American Statistical Association webinar (2010/11).
+- "No need to worry if you are unsure about the prior - lots of noninformtive priors that work just great."
+- "... the term “noninformative” appears to be a Whorfian trick of language. Just as an “empty” gasoline drum is more dangerous than a “full” one (Whorf 1941), a noninformative prior may distort estimates more than would an informative prior." (McElreath and Koster, 2014)
 - **Take no one's word for it!**
+
+
+Need to worry if you are unsure about the prior.
+========================================================
+
+- One of the first I heard about was from Peter F. Thall at M.D. Anderson Cancer Center. 
+- Not obvious at the time perhaps given the lack of awareness of the dangers of (silly?) default flat (noninformative) priors. 
+- In 2011 I emailed him and got back *It seems that we are both in the How to tell if you have a prior with undesirable properties business. I got into this years ago when I was doing CRM dose finding with the model logit{Prob(toxicity | dose )} = a + b log(dose) and just assumed _noninformative_ normal priors on  a and b, with variance = 100.  The resulting CRM design does strange things with the first 3 to 6 patients. It drove me and my programmer crazy for a month.*
+- See [Stan Prior Choice Recommendations wiki LINK.](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
 
 
 Conceptual review of statistics. 
 ========================================================
 Seeing all of statistics all at once.
 
-- In both Bayes and Frequentist statistics the holy grail is clearly seeing what repeatedly would happen.
-- When trying to learn from observations like the ones you have in hand.
-- Helpful? metaphors of discerning what cast the shadows just from the shadows. 
+- In both Bayes and Frequentist statistics the holy grail is clearly seeing what repeatedly would happen when trying to learn from observations like the ones you have in hand.
+- A helpful? metaphor of discerning what cast the shadows. 
 - Think of learning about an object just from the shadows it casts while being unable to look directly at the object.
-
-Conceptual review of statistics (cont.)
-========================================================
-Seeing all of statistics all at once.
-
-- We see those shadows but really are only interested in what is casting them. They may look very scary, but the object casting them maybe mice. 
-- All too common to take noisy observations as the reality that generated them.
-- My toy example today will be annual faint rates in business leaders "rounds" at Toronto Hospital where 3 out of 9 fainted the one year I heard about it.
+- We see those shadows but really are only interested in what is casting them. They may look very scary, but the object casting them maybe mice. (All too common to take noisy observations as the reality that generated them.)
 
 
 Strategy: Generate realistic Fake Universes to better grasp reality.  
@@ -77,19 +96,21 @@ Strategy: Generate realistic Fake Universes to better grasp reality.
 - Make something where you can easily "see" what would repeatedly happen.
 - In analytical chemistry you can repeatedly spike test tubes with know trace amounts of X.
 - In statistics we can't repeatedly spike humans with say know faint rates. 
+- So we have to represent faint rates abstractly - make a fake universe were you set the rate. 
+- Most statisticians prefer to use probability models (and math) to do that.
 
 Strategy: Generate realistic Fake Universes to better grasp reality (cont.) 
 ========================================================
 
-- So we have to represent faint rates abstractly - make a fake universe were you set the rate. 
-- Most statisticians prefer to use probability models (and math) to do that.
-- Today almost anyone can use probability models (and simulation!!!) to do that.
-- Math: The exact study of ideal states of things (fake universe).
+- Today almost anyone can use probability models (and simulation!!!) to make fake universes.
+- Math: The exact study of ideal states of things (a fake universe).
 - Simulation: The approximate study of the same.
-- Two stage simulation is the just the Bayesian version of generating realistic? fake universes!
+- Two stage simulation is the just the Bayesian version of generating realistic enough? fake universes!
+- My toy example today will be annual faint rates in business leaders "rounds" at Toronto Hospital where 3 out of 9 fainted the one year I heard about it.
 
 Lets plot the set of fake universes.
 ========================================================
+Two stage simulation, simulate the faint rate and then number of faints given that rate. 
 
 ```{r simpleSim1 , echo=FALSE, cache = TRUE}
 p <- table(round(rbeta(100000,.5,.5),1))[c(-1,-11)]
@@ -132,7 +153,6 @@ scatterplot3d(mat[,c(2,1,3)], pch = 16, type="h",main="Set of Fake Universes for
 
 Why make fake universes of faint rates and occurrences?
 ========================================================
-Two stage simulation, simulate the faint rate and then number of faints given that rate. 
 
 - Once the joint model is set - the prior and data generating model - Bayes is deductive. 
 - The joint model is the first premise, the data is the second premise and the posterior is the conclusion.
@@ -196,32 +216,13 @@ scatterplot3d(mat[,c(2,1,3)], pch = 16, type="h",color = ourUniverse,main="The p
 ```
 
 
-But so much more to make of the set of fake universes generated.
-========================================================
-
-```{r simpleSim3a, echo=FALSE,cache = TRUE, dependson = "simpleSim1"}
-
-sample3 <- t(fakeUs[,fakeUs[2,] == 3])
-sampleNot3 <- t(fakeUs[,fakeUs[2,] != 3])
-subSample <- data.frame(sample3[1:3,],sampleNot3[1:3,])
-dimnames(subSample)[[2]] <- c("TrueProp1","3 Faints","TrueProp2","Not 3 Faints")
-subSample
-
-```
-
-- Samples on the left are valid posterior samples - right?
-- What are the ones on the right a valid posterior sample from?
-- But now you know how to get many posterior samples using MCMC.
-- If the MCMC is valid the ranks of two stage sample with the MCMC sampleS (say 500) should be uniform. 
-- Now we can check the MCMC sampling for every point in the fake universes generated (true parameter, valid sample).
-
 Things to consider on the last slides.
 ========================================================
 
 - Are these fake universes and repeatedly happening faint totals roughly like our universe?
 - Biggest fail so far may be air density greater than concrete in air quality modeling.
-- **If not too wrong, provides an ample labratory to evaluate the performance of the given joint model and data!**
-- Often a good idea to used different joint model to create *wronger* fake universes for the joint model been used in the analysis.
+- *If not too wrong, provides an ample labratory to evaluate the performance of the given joint model and data!*
+- Often a good idea to use different joint model to create the fake universes to evaluate the Bayesian model actually being used in the analysis.
 
 
 Marginal views and disagreements on views.
@@ -253,7 +254,27 @@ ggplot(data, aes(x=x, y=y)) +
 
 - Prior predictive distribution is on the right - seem realistic?
 - Marginal prior distribution over all universes is on the left - do these parameters seem realistic.
-- Some argue only look at the first (which has advantages especialy with many parameters) while I would look at both. 
+- Some argue only look at the second (which has advantages especially with many parameters) while I would look at both. 
+
+
+But so much more to make of the set of fake universes generated.
+========================================================
+
+```{r simpleSim3a, echo=FALSE,cache = TRUE, dependson = "simpleSim1"}
+
+sample3 <- t(fakeUs[,fakeUs[2,] == 3])
+sampleNot3 <- t(fakeUs[,fakeUs[2,] != 3])
+subSample <- data.frame(sample3[1:3,],sampleNot3[1:3,])
+dimnames(subSample)[[2]] <- c("TrueProp1","3 Faints","TrueProp2","Not 3 Faints")
+subSample[1:2,]
+
+```
+
+- Samples on the left are valid posterior samples - right?
+- What are the ones on the right a valid posterior sample from?
+- But you know how to get many posterior samples using MCMC.
+- If your MCMC is valid the ranks of two stage sample with the MCMC sampleS (say 500) should be uniform. 
+- Now we can check the MCMC sampling for every point in the fake universes generated (true parameter, valid sample).
 
 Three tasks in principled Bayesian workflow to be safer.
 ========================================================
@@ -261,7 +282,7 @@ Three tasks in principled Bayesian workflow to be safer.
 - Three tasks in Bayesian Workflow - assess adequacy of joint model, posterior sampling and data. 
 - Assessing the adequacy of joint model has only become practical in the past 5 or so years. 
 - Around 2012 even experts were refusing (even saying not kosher in Bayes). 
-- Still some resistence to assessing the adequacy of the data?
+- Still some resistance to assessing the adequacy of the data?
 - Lots can and did go wrong and it remains the most challenging aspect (and an incentive to just ignore it?).
 
 
@@ -271,27 +292,9 @@ Makes safe Bayes practical (was not until recently!).
 
 - Domain Expertise Consistency: Is our model consistent with our domain expertise?
 - Computational Faithfulness: Are our computational tools sufficient to accurately fit the model?
-- Model Sensitivity: How do we expect our inferences to perform over the possible fake universes?
+- Model Sensitivity: How do we expect our inferences to perform over the possible samples in fake universes?
 - (Model Adequacy: Is our model rich enough to capture the relevant structure of our universe?)
 
-Some early experience.
-========================================================
-
-- Used someone's published Bayesian model - obtained positive posterior probabilities for negative proportions.
-- The priors they had specified were independent even though proportions were dependent.
-- Contacted the author - they were unconcerned.
-- Claimed it was a result of my not having adequate data and so no need to worry. 
-- Sometimes it is hard to know when you have adequate data but one of the premises is obviously false ane *should* be fixed.
-- (This sort of thing was be done a lot in early 2000s given limitations).
-
-
-More early experience.
-========================================================
-
-- One of the first I heard about without an obvious error was from Peter F. Thall at M.D. Anderson Cancer Center. 
-- Not obvious at the time perhaps given the lack of awareness of the dangers of (silly?) default flat priors. 
-- In 2011 I emailed him and got back *It seems that we are both in the How to tell if you have a prior with undesirable properties business. I got into this years ago when I was doing CRM dose finding with the model logit{Prob(toxicity | dose )} = a + b log(dose) and just assumed _noninformative_ normal priors on  a and b, with variance = 100.  The resulting CRM design does strange things with the first 3 to 6 patients. It drove me and my programmer crazy for a month.*
-- See [Stan Prior Choice Recommendations wiki.](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
 
 A more sensible set of fake universes?
 ========================================================
@@ -683,9 +686,9 @@ if (sum(warning_code) != 0) {
 
 ```
 
-Model Sensitivity: Generic Posterior Shrinkage (1 - post.var/prior.var) and z-Scores ((post.mean - truth)/post.sd
+Model Sensitivity. 
 ========================================================
-
+Generic Posterior Shrinkage and z-Scores.
 
 ```{r rstan6a, echo=FALSE ,cache = TRUE, dependson = "stan4b"}
 
@@ -694,35 +697,33 @@ z_score <- ensemble_output[3,]
 shrinkage <- ensemble_output[4,]
 
 plot(shrinkage, z_score, col=c("#8F272720"), lwd=2, pch=16, cex=0.8,
-  xlim=c(0, 1), xlab="Posterior Shrinkage",
-  ylim=c(-5, 5), ylab="Posterior z-Score")
+  xlim=c(0, 1), xlab="Posterior Shrinkage (1 - post.var/prior.var)",
+  ylim=c(-5, 5), ylab="Posterior z-Score ((post.mean - truth)/post.sd")
 
 
 ```
 
 Model Sensitivity: More focused assessments.
 ========================================================
-For instance type 1 and 2 errors. 
 
-- [FDA 2010 guidance for doing simulations to obtain operating characteristics](https://www.fda.gov/media/71512/download)
--- FDA usually recommends you provide simulations of your trial at the planning (or
+- [FDA 2010 guidance LINK](https://www.fda.gov/media/71512/download)
+- "FDA usually recommends you provide simulations of your trial at the planning (or
 IDE) stage. This will facilitate FDA’s assessment of the operating characteristics of
-the Bayesian trial; specifically, the type I and type II error rates. 
-- Actually carried out a feasibility study of calculating the type I and type II error rates with a major pharma consulting firm and Yongmin Yu at Health Canada in 2012.
+the Bayesian trial; specifically, the type I and type II error rates." 
+- Actually carried out a feasibility study of calculating the type I and type II error rates with a major pharma consulting firm and Yongmin Yu at Health Canada in 2012. 
 
 
 Pick one universe and repeatedly sample and see what happens.
 ========================================================
 
-- To re-use my toy example think needing to know if rate not >= 50%.
-- Set the probability of fainting to .5 and simulate data just for that universe.
-- Type 1 error? See how often - 
-- (post_mean_theta - .5) / post_sd_theta < -1.65.
+- Think of needing to know if faint rate not >= 50%.
+- Set the probability of fainting to .5 and simulate data just for that fake universe.
+- Type 1 error? See how often ((post_mean_theta - .5) / post_sd_theta) < -1.65.
 - Calculate the 90th percentile of posterior probability.
 - See how often that is claimed < 50%.
 
 
-What repeatedly happens in this fake universe.
+What repeatedly happens in this fake universe of 50% fainting.
 ========================================================
 
 
@@ -803,7 +804,7 @@ hist(ensemble_output[7,],breaks = 30,main="Histogram of 90th percentile of poste
 
 Model Adequacy: Checking the posterior itself.
 ========================================================
-
+Not much to see with this toy example.
 
 ```{r  rstan7, cache = TRUE, results = "hide", message = FALSE, warning = FALSE, echo=FALSE}
 modelString = "
@@ -867,7 +868,7 @@ lines(ii,dbeta(ii,5,10),col=2)
 
 ```
 
-Checking accuracy of posterior quantiles.
+Its a developing field - checking accuracy of posterior quantiles.
 ========================================================
 Check Stan website if a concern.
 
@@ -878,4 +879,41 @@ lines(seq(.01,.99,.03),qbeta(seq(.01,.99,.03),5,10))
 lines(seq(.01,.99,.03),quantile(params$theta,probs = seq(.01,.99,.03),5,10),col=2)
 
 ```
+
+Summary: Bayes enables powerful analyses.
+========================================================
+With great power comes great responsibility.
+
+- Safe Bayes requires adequate assessment of:
+- The joint model specified. 
+- The posterior sampling carried out (usually MCMC). 
+- The adequacy of the study design/data. 
+- This is a developing field - one needs to stay current. 
+
+Summary (cont.).
+========================================================
+
+- The joint model defines a set of of fake universes and what repeatedly happens in them. 
+- That set should (!must) include mostly *close enough to our universe* fake universes. 
+- If not the posterior might (!will) be misleading for our universe. 
+- Two stage sampling provides a way to assess if fake universes look like ours.
+
+Summary (cont.).
+========================================================
+
+- The posterior needs to be adequately sampled from. 
+- Two stage sampling offers an additional direct assessment tool of whether sampling from the posterior was adequate.
+- Extraction of information cannot exceed what is actually in the data (if it does, its error not signal). 
+- Two stage sampling offers a way to assess the distribution of information in the study design/data. 
+
+Summary (cont.).
+========================================================
+
+- How often the Bayesian analysis will be misleading is important.
+- Smart people don't like being repeatedly wrong (Don Rubin). 
+- Study designs (especially with large sample sizes) can mitigate a poor set of fake universes.
+- Inadequate posterior sampling and poor data likely fatal.
+- But don't assume or take anyone's word for it - check!
+
+
 
